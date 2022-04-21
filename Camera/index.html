@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha engine</title>
+ 
+</head>
+<style type="text/css">
+	body{
+		width: 100%;
+		height: 100vh;
+	}
+</style>
+<body>
+	<canvas width="300" height="300" style="border: 1px solid black" ></canvas>
+ <script>
+ 	let canvas = document.querySelector("canvas");
+ 	let ctx = canvas.getContext('2d');
+
+ 		//recusos
+ 		let background = new Image();
+ 		background.src = "scene.png";
+
+ 		let monster = new Image();
+ 		monster.src = "monster.png";
+
+ 		//objetos
+ 		let sprites =[];
+ 		let gameWordId = {
+ 			img:background,
+ 			x:0,
+ 			y:0,
+ 			width:800,
+ 			height:600
+ 		};
+ 		sprites.push(gameWordId);
+
+ 			let char = {
+ 				img:monster,
+ 				x:0,
+ 				y:0,
+ 				width:64,
+ 				height:64,
+ 			};
+ 		sprites.push(char);
+
+ 		//centralizar o char
+ 		char.x = (gameWordId.width - char.width)/2;
+ 		char.y = (gameWordId.height - char.height)/2;
+
+ 		let cam = {
+ 			x:0,
+ 			y:0,
+ 			width:canvas.width,
+ 			height:canvas.height,
+ 			leftEdg:function(){
+ 				return this.x + (this.width * 0.25);
+ 			},
+ 			rigthEdg:function(){
+ 				return this.x +(this.width * 0.75);
+ 			},
+ 			topEdg:function(){
+ 				return this.y +(this.height * 0.25);
+ 			},
+ 			bottomEdg:function(){
+ 				return this.y +(this.height * 0.75);
+ 			}
+ 		}
+ 		//centralizar camera 
+ 		cam.x = (gameWordId.width - cam.width)/2;
+ 		cam.y = (gameWordId.height - cam.height)/2;
+
+ 		//mover o char 
+ 		let mvleft = mvRigth = mvup = mvDown = false;
+ 		window.addEventListener("keydown",function(e){
+ 			let key = e.keyCode;
+ 			switch(key){
+ 				case 37:
+ 				 mvleft = true;
+ 				break;
+ 				case 39:
+ 				 mvRigth = true;
+ 				break;
+ 				case 38:
+ 				 mvup = true;
+ 				break;
+ 				case 40:
+ 				 mvDown = true;
+ 				break;
+ 				
+ 			}
+ 		},false);
+
+ 		window.addEventListener("keyup",function(e){
+ 			let key = e.keyCode;
+ 			switch(key){
+ 				case 37:
+ 				 mvleft = false;
+ 				break;
+ 				case 39:
+ 				 mvRigth = false;
+ 				break;
+ 				case 38:
+ 				 mvup = false;
+ 				break;
+ 				case 40:
+ 				 mvDown = false;
+ 				break;
+ 				
+ 			}
+ 		},false)
+
+
+ 	function loop(){	
+ 		update();
+ 		render();
+ 		window.requestAnimationFrame(loop,ctx);
+ 	}
+ 	function update(){
+ 		if(mvleft && !mvRigth){
+ 			char.x -= 2;
+ 		};
+ 		if(mvRigth && !mvleft){
+ 			char.x += 2;
+ 		};
+ 		if(mvup && !mvDown){
+ 			char.y -= 2;
+ 		};
+ 		if(mvDown && !mvup){
+ 			char.y += 2;
+ 		};
+
+ 		//autualizar  posição da camera em posição da char
+ 		if (char.x < cam.leftEdg()) {
+ 			cam.x = char.x - (cam.width *0.25);
+ 			
+ 		}
+ 		if (char.x + char.width > cam.rigthEdg()) {
+ 			cam.x = char.x + char.width - (cam.width *0.75);
+ 			
+ 		}
+ 		if (char.y < cam.topEdg()) {
+ 			cam.y = char.y - (cam.height *0.25);
+ 			
+ 		}
+ 		if (char.y + char.height > cam.bottomEdg()) {
+ 			cam.y = char.y + char.height - (cam.height *0.75);
+ 			
+ 		}
+
+ 		//limete para char
+ 		if(char.x <0){
+ 			char.x = 0
+ 		}
+ 		if (char.x + char.width > gameWordId.width) {
+ 			char.x = gameWordId.width - char.width;
+ 		}
+ 		if(char.y <0){
+ 			char.y = 0
+ 		}
+ 		if (char.y + char.height > gameWordId.height) {
+ 			char.y = gameWordId.height - char.height;
+ 		}
+
+ 		//limete  para camera
+ 		if(cam.x <0){
+ 			cam.x = 0
+ 		}
+ 		if (cam.x + cam.width > gameWordId.width) {
+ 			cam.x = gameWordId.width - cam.width;
+ 		}
+ 		if(cam.y <0){
+ 			cam.y = 0
+ 		}
+ 		if (cam.y + cam.height > gameWordId.height) {
+ 			cam.y = gameWordId.height - cam.height;
+ 		}
+
+ 	}
+ 	function render(){
+ 		ctx.save();
+ 		ctx.translate(-cam.x,-cam.y);
+ 		for (var i in sprites) {
+ 			let spr = sprites[i];
+ 			ctx.drawImage(spr.img,0,0,spr.width,spr.height,spr.x,spr.y,spr.width,spr.height);
+ 		};
+ 		ctx.restore();
+ 		ctx.font = "bold 25 Arial";
+ 		ctx.fillText("score:0",10,30)
+ 	}
+ 	loop();
+ </script>       
+</body>
+</html>
